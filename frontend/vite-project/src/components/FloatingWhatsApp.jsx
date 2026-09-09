@@ -2,7 +2,7 @@ import React from 'react';
 
 const FloatingWhatsApp = () => {
   // Nee studio WhatsApp number ikkada ivvu (country code tho patu, e.g., 919876543210)
-  const phoneNumber = "919876543210"; 
+  const phoneNumber = "7893030963"; 
   const message = "Hi Srikar Studio, I want to know more about your photography packages and book a session!";
 
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;

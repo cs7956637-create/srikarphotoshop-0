@@ -98,7 +98,7 @@ const ContractForm = () => {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="e.g. Rahul Verma"
+                  placeholder="e.g. Srikar"
                   className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-amber-500/80 transition duration-300"
                 />
               </div>
@@ -114,7 +114,7 @@ const ContractForm = () => {
                   required
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="+91 98765 43210"
+                  placeholder="+91 78930 30963"
                   className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-amber-500/80 transition duration-300"
                 />
               </div>
@@ -131,7 +131,7 @@ const ContractForm = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="rahul@example.com"
+                  placeholder="srikar@example.com"
                   className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-amber-500/80 transition duration-300"
                 />
               </div>
