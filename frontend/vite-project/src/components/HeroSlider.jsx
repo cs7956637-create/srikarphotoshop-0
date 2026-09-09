@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 
-const sliderImages = [
+const staticSliderImages = [
   {
     url: '/images/hero-1.jpg',
     fallback: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?q=80&w=1920&auto=format&fit=crop',
@@ -24,15 +24,23 @@ const sliderImages = [
 
 const HeroSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [offerBanners, setOfferBanners] = useState([]);
+  const [sliderImages, setSliderImages] = useState(staticSliderImages);
 
-  // Fetch Live Admin Offer Banners
+  // Fetch Live Admin Offer Banners and prepend/combine them into the slider
   useEffect(() => {
     const fetchBanners = async () => {
       try {
         const { data } = await API.get('/offers');
         if (data && data.length > 0) {
-          setOfferBanners(data);
+          // Map admin offers to match slider structure using Cloudinary imageUrl
+          const mappedBanners = data.map(banner => ({
+            url: banner.imageUrl,
+            fallback: 'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1920&auto=format&fit=crop',
+            title: banner.title,
+            subtitle: banner.description
+          }));
+          // Combine admin banners first, then static images (or just use mappedBanners)
+          setSliderImages([...mappedBanners, ...staticSliderImages]);
         }
       } catch (err) {
         console.error('Failed to load offer banners', err);
@@ -47,7 +55,7 @@ const HeroSlider = () => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % sliderImages.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [sliderImages.length]);
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % sliderImages.length);
@@ -88,28 +96,16 @@ const HeroSlider = () => {
       {/* Hero Content Overlay */}
       <div className="relative z-10 max-w-4xl space-y-6 pt-16">
         
-        {/* Dynamic Offer Banner Notice (Displays when Admin uploads banners) */}
-        {offerBanners.length > 0 ? (
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-amber-500/20 border border-amber-500/40 px-4 py-1.5 rounded-full backdrop-blur-md animate-pulse">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-black bg-amber-400 px-2 py-0.5 rounded-full">
-              Special Offer
-            </span>
-            <span className="text-xs font-semibold text-amber-300">
-              {offerBanners[0].title}: {offerBanners[0].description}
-            </span>
-          </div>
-        ) : (
-          <span className="inline-block text-xs font-bold uppercase tracking-[0.3em] text-amber-400 bg-amber-500/10 px-5 py-2 rounded-full border border-amber-500/20 backdrop-blur-md">
-            Srikar Photo Studio • Rajampet
-          </span>
-        )}
+        <span className="inline-block text-xs font-bold uppercase tracking-[0.3em] text-amber-400 bg-amber-500/10 px-5 py-2 rounded-full border border-amber-500/20 backdrop-blur-md">
+          Srikar Photo Studio • Rajampet
+        </span>
 
         <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight leading-tight gold-gradient-text font-serif drop-shadow-2xl transition-all duration-500">
-          {sliderImages[currentIndex].title}
+          {sliderImages[currentIndex]?.title}
         </h1>
 
         <p className="text-base md:text-xl text-neutral-300 font-light max-w-2xl mx-auto leading-relaxed drop-shadow transition-all duration-500">
-          {sliderImages[currentIndex].subtitle}
+          {sliderImages[currentIndex]?.subtitle}
         </p>
 
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">

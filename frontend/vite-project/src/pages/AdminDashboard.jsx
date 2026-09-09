@@ -181,21 +181,41 @@ const handleDeleteGallery = async (id) => {
           </div>
         )}
 
-        {activeTab === 'banners' && (
+       {activeTab === 'banners' && (
           <div>
             <h1 className="text-2xl font-bold text-amber-500 mb-6">Offer Banners</h1>
-            <form onSubmit={handleAddBanner} className="bg-neutral-900 p-6 rounded-2xl mb-8 space-y-4 max-w-2xl">
-              <input type="text" placeholder="Banner Title" value={bannerForm.title} onChange={e => setBannerForm({...bannerForm, title: e.target.value})} required className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm" />
-              <input type="text" placeholder="Offer Details" value={bannerForm.description} onChange={e => setBannerForm({...bannerForm, description: e.target.value})} className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm" />
-              <input type="file" onChange={e => setBannerForm({...bannerForm, image: e.target.files[0]})} required className="text-sm text-neutral-400" />
+            <form onSubmit={handleAddBanner} className="bg-neutral-900 p-6 rounded-2xl mb-8 space-y-4 max-w-2xl border border-neutral-800">
+              <input type="text" placeholder="Banner Title" value={bannerForm.title} onChange={e => setBannerForm({...bannerForm, title: e.target.value})} required className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" />
+              <input type="text" placeholder="Offer Details" value={bannerForm.description} onChange={e => setBannerForm({...bannerForm, description: e.target.value})} className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" />
+              <input type="file" onChange={e => setBannerForm({...bannerForm, image: e.target.files[0]})} required className="text-sm text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-black hover:file:bg-amber-400 cursor-pointer" />
               <button type="submit" className="bg-amber-500 text-black px-6 py-2 rounded-xl text-xs font-bold uppercase cursor-pointer">Upload Banner</button>
             </form>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {banners.map(b => (
-                <div key={b._id} className="bg-neutral-900 p-4 rounded-2xl border border-neutral-800">
-                  <p className="font-bold text-amber-400">{b.title}</p>
-                  <p className="text-xs text-neutral-400">{b.description}</p>
+                <div key={b._id} className="bg-neutral-900 p-4 rounded-2xl border border-neutral-800 space-y-3">
+                  {b.imageUrl && (
+                    <img src={b.imageUrl} alt={b.title} className="w-full h-40 object-cover rounded-xl" />
+                  )}
+                  <div>
+                    <h3 className="font-bold text-amber-400">{b.title}</h3>
+                    <p className="text-xs text-neutral-400">{b.description}</p>
+                  </div>
+                  <button 
+                    onClick={async () => {
+                      if (window.confirm('Delete this banner?')) {
+                        try {
+                          await API.delete(`/offers/${b._id}`);
+                          setBanners(banners.filter(item => item._id !== b._id));
+                        } catch (err) {
+                          console.error("Failed to delete banner", err);
+                        }
+                      }
+                    }} 
+                    className="w-full bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer"
+                  >
+                    Delete Banner
+                  </button>
                 </div>
               ))}
             </div>
