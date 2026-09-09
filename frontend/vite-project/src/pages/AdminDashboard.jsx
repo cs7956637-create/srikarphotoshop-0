@@ -13,12 +13,14 @@ const AdminDashboard = () => {
   const [bannerForm, setBannerForm] = useState({ title: '', description: '', image: null });
 
   // Gallery State
-  // Gallery State
-const [gallery, setGallery] = useState([]);
-const [galleryForm, setGalleryForm] = useState({ title: '', category: '', image: null });
+  const [gallery, setGallery] = useState([]);
+  const [galleryForm, setGalleryForm] = useState({ title: '', category: '', image: null });
 
   // Enquiries State
   const [enquiries, setEnquiries] = useState([]);
+
+  // Featured YouTube Video State
+  const [youtubeUrl, setYoutubeUrl] = useState('');
 
   // Fetch Data on Tab Change
   useEffect(() => {
@@ -26,6 +28,7 @@ const [galleryForm, setGalleryForm] = useState({ title: '', category: '', image:
     if (activeTab === 'banners') fetchBanners();
     if (activeTab === 'gallery') fetchGallery();
     if (activeTab === 'enquiries') fetchEnquiries();
+    if (activeTab === 'video') fetchVideo();
   }, [activeTab]);
 
   const fetchServices = async () => {
@@ -56,6 +59,13 @@ const [galleryForm, setGalleryForm] = useState({ title: '', category: '', image:
     } catch (err) { console.error(err); }
   };
 
+  const fetchVideo = async () => {
+    try {
+      const res = await API.get('/video');
+      if (res.data) setYoutubeUrl(res.data.youtubeUrl || '');
+    } catch (err) { console.error(err); }
+  };
+
   // Handlers for Services
   const handleAddService = async (e) => {
     e.preventDefault();
@@ -75,7 +85,7 @@ const [galleryForm, setGalleryForm] = useState({ title: '', category: '', image:
   };
 
   // Handlers for Banners
-const handleAddBanner = async (e) => {
+  const handleAddBanner = async (e) => {
     e.preventDefault();
     const data = new FormData();
     data.append('title', bannerForm.title);
@@ -89,38 +99,52 @@ const handleAddBanner = async (e) => {
       alert('Banner uploaded successfully!');
     } catch (err) {
       console.error(err);
-      // Ekkada error vastundo browser pop-up lo clear ga chupisthundi
       alert('Error uploading banner: ' + (err.response?.data?.message || err.response?.data?.error || err.message));
     }
   };
+
+  // Handlers for Gallery
   const handleAddGallery = async (e) => {
-  e.preventDefault();
-  const data = new FormData();
-  data.append('title', galleryForm.title);
-  data.append('category', galleryForm.category);
-  if (galleryForm.image) data.append('image', galleryForm.image);
+    e.preventDefault();
+    const data = new FormData();
+    data.append('title', galleryForm.title);
+    data.append('category', galleryForm.category);
+    if (galleryForm.image) data.append('image', galleryForm.image);
 
-  try {
-    await API.post('/gallery', data, { headers: { 'Content-Type': 'multipart/form-data' } });
-    setGalleryForm({ title: '', category: '', image: null });
-    fetchGallery();
-    alert('Gallery photo uploaded successfully!');
-  } catch (err) {
-    console.error(err);
-    alert('Error uploading photo: ' + (err.response?.data?.message || err.response?.data?.error || err.message));
-  }
-};
-
-const handleDeleteGallery = async (id) => {
-  if (window.confirm('Delete this gallery photo?')) {
     try {
-      await API.delete(`/gallery/${id}`);
-      setGallery(gallery.filter(g => g._id !== id));
+      await API.post('/gallery', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setGalleryForm({ title: '', category: '', image: null });
+      fetchGallery();
+      alert('Gallery photo uploaded successfully!');
     } catch (err) {
-      console.error("Failed to delete gallery photo", err);
+      console.error(err);
+      alert('Error uploading photo: ' + (err.response?.data?.message || err.response?.data?.error || err.message));
     }
-  }
-};
+  };
+
+  const handleDeleteGallery = async (id) => {
+    if (window.confirm('Delete this gallery photo?')) {
+      try {
+        await API.delete(`/gallery/${id}`);
+        setGallery(gallery.filter(g => g._id !== id));
+      } catch (err) {
+        console.error("Failed to delete gallery photo", err);
+      }
+    }
+  };
+
+  // Handler for YouTube Video Save
+  const handleSaveVideo = async (e) => {
+    e.preventDefault();
+    try {
+      await API.post('/video', { youtubeUrl });
+      alert('YouTube Video updated successfully!');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update YouTube video');
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-neutral-950 text-white">
       {/* Sidebar */}
@@ -129,25 +153,31 @@ const handleDeleteGallery = async (id) => {
         <nav className="space-y-3">
           <button
             onClick={() => setActiveTab('pricing')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition ${activeTab === 'pricing' ? 'bg-amber-500 text-black' : 'text-neutral-400 hover:bg-neutral-800'}`}
+            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition cursor-pointer ${activeTab === 'pricing' ? 'bg-amber-500 text-black' : 'text-neutral-400 hover:bg-neutral-800'}`}
           >
             💲 Manage Pricing
           </button>
           <button
             onClick={() => setActiveTab('banners')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition ${activeTab === 'banners' ? 'bg-amber-500 text-black' : 'text-neutral-400 hover:bg-neutral-800'}`}
+            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition cursor-pointer ${activeTab === 'banners' ? 'bg-amber-500 text-black' : 'text-neutral-400 hover:bg-neutral-800'}`}
           >
             🏷️ Offer Banners
           </button>
           <button
             onClick={() => setActiveTab('gallery')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition ${activeTab === 'gallery' ? 'bg-amber-500 text-black' : 'text-neutral-400 hover:bg-neutral-800'}`}
+            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition cursor-pointer ${activeTab === 'gallery' ? 'bg-amber-500 text-black' : 'text-neutral-400 hover:bg-neutral-800'}`}
           >
             🖼️ Gallery Photos
           </button>
           <button
+            onClick={() => setActiveTab('video')}
+            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition cursor-pointer ${activeTab === 'video' ? 'bg-amber-500 text-black' : 'text-neutral-400 hover:bg-neutral-800'}`}
+          >
+            🎬 Featured Video
+          </button>
+          <button
             onClick={() => setActiveTab('enquiries')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition ${activeTab === 'enquiries' ? 'bg-amber-500 text-black' : 'text-neutral-400 hover:bg-neutral-800'}`}
+            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition cursor-pointer ${activeTab === 'enquiries' ? 'bg-amber-500 text-black' : 'text-neutral-400 hover:bg-neutral-800'}`}
           >
             ✉️ Customer Enquiries
           </button>
@@ -159,11 +189,11 @@ const handleDeleteGallery = async (id) => {
         {activeTab === 'pricing' && (
           <div>
             <h1 className="text-2xl font-bold text-amber-500 mb-6">Live Service Pricing</h1>
-            <form onSubmit={handleAddService} className="bg-neutral-900 p-6 rounded-2xl mb-8 space-y-4 max-w-2xl">
-              <input type="text" placeholder="Package Title" value={serviceForm.title} onChange={e => setServiceForm({...serviceForm, title: e.target.value})} required className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm" />
-              <input type="text" placeholder="Price (e.g. 75,000)" value={serviceForm.price} onChange={e => setServiceForm({...serviceForm, price: e.target.value})} required className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm" />
-              <textarea placeholder="Description" value={serviceForm.description} onChange={e => setServiceForm({...serviceForm, description: e.target.value})} className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm" />
-              <input type="text" placeholder="Features (comma-separated)" value={serviceForm.features} onChange={e => setServiceForm({...serviceForm, features: e.target.value})} className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm" />
+            <form onSubmit={handleAddService} className="bg-neutral-900 p-6 rounded-2xl mb-8 space-y-4 max-w-2xl border border-neutral-800">
+              <input type="text" placeholder="Package Title" value={serviceForm.title} onChange={e => setServiceForm({...serviceForm, title: e.target.value})} required className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" />
+              <input type="text" placeholder="Price (e.g. 75,000)" value={serviceForm.price} onChange={e => setServiceForm({...serviceForm, price: e.target.value})} required className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" />
+              <textarea placeholder="Description" value={serviceForm.description} onChange={e => setServiceForm({...serviceForm, description: e.target.value})} className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" />
+              <input type="text" placeholder="Features (comma-separated)" value={serviceForm.features} onChange={e => setServiceForm({...serviceForm, features: e.target.value})} className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" />
               <button type="submit" className="bg-amber-500 text-black px-6 py-2 rounded-xl text-xs font-bold uppercase cursor-pointer">Add Package</button>
             </form>
 
@@ -181,7 +211,7 @@ const handleDeleteGallery = async (id) => {
           </div>
         )}
 
-       {activeTab === 'banners' && (
+        {activeTab === 'banners' && (
           <div>
             <h1 className="text-2xl font-bold text-amber-500 mb-6">Offer Banners</h1>
             <form onSubmit={handleAddBanner} className="bg-neutral-900 p-6 rounded-2xl mb-8 space-y-4 max-w-2xl border border-neutral-800">
@@ -222,57 +252,72 @@ const handleDeleteGallery = async (id) => {
           </div>
         )}
 
-       {activeTab === 'gallery' && (
-  <div>
-    <h1 className="text-2xl font-bold text-amber-500 mb-6">Gallery Photos</h1>
-    
-    {/* Gallery Upload Form */}
-    <form onSubmit={handleAddGallery} className="bg-neutral-900 p-6 rounded-2xl mb-8 space-y-4 max-w-2xl border border-neutral-800">
-      <input 
-        type="text" 
-        placeholder="Photo Title (e.g. Traditional Wedding)" 
-        value={galleryForm.title} 
-        onChange={e => setGalleryForm({...galleryForm, title: e.target.value})} 
-        required 
-        className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" 
-      />
-      <input 
-        type="text" 
-        placeholder="Category (e.g. Wedding, Baby, Pre-Wedding)" 
-        value={galleryForm.category} 
-        onChange={e => setGalleryForm({...galleryForm, category: e.target.value})} 
-        required 
-        className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" 
-      />
-      <input 
-        type="file" 
-        onChange={e => setGalleryForm({...galleryForm, image: e.target.files[0]})} 
-        required 
-        className="text-sm text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-black hover:file:bg-amber-400 cursor-pointer" 
-      />
-      <button type="submit" className="bg-amber-500 text-black px-6 py-2 rounded-xl text-xs font-bold uppercase cursor-pointer">Upload Photo</button>
-    </form>
-
-    {/* Gallery Grid Display */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      {gallery.map(item => (
-        <div key={item._id} className="bg-neutral-900 p-4 rounded-2xl border border-neutral-800 space-y-3">
-          <img src={item.imageUrl} alt={item.title} className="w-full h-40 object-cover rounded-xl" />
+        {activeTab === 'gallery' && (
           <div>
-            <h3 className="font-bold text-amber-400">{item.title}</h3>
-            <p className="text-xs text-neutral-400">Category: {item.category}</p>
+            <h1 className="text-2xl font-bold text-amber-500 mb-6">Gallery Photos</h1>
+            <form onSubmit={handleAddGallery} className="bg-neutral-900 p-6 rounded-2xl mb-8 space-y-4 max-w-2xl border border-neutral-800">
+              <input 
+                type="text" 
+                placeholder="Photo Title (e.g. Traditional Wedding)" 
+                value={galleryForm.title} 
+                onChange={e => setGalleryForm({...galleryForm, title: e.target.value})} 
+                required 
+                className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" 
+              />
+              <input 
+                type="text" 
+                placeholder="Category (e.g. Wedding, Baby, Pre-Wedding)" 
+                value={galleryForm.category} 
+                onChange={e => setGalleryForm({...galleryForm, category: e.target.value})} 
+                required 
+                className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" 
+              />
+              <input 
+                type="file" 
+                onChange={e => setGalleryForm({...galleryForm, image: e.target.files[0]})} 
+                required 
+                className="text-sm text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-black hover:file:bg-amber-400 cursor-pointer" 
+              />
+              <button type="submit" className="bg-amber-500 text-black px-6 py-2 rounded-xl text-xs font-bold uppercase cursor-pointer">Upload Photo</button>
+            </form>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {gallery.map(item => (
+                <div key={item._id} className="bg-neutral-900 p-4 rounded-2xl border border-neutral-800 space-y-3">
+                  <img src={item.imageUrl} alt={item.title} className="w-full h-40 object-cover rounded-xl" />
+                  <div>
+                    <h3 className="font-bold text-amber-400">{item.title}</h3>
+                    <p className="text-xs text-neutral-400">Category: {item.category}</p>
+                  </div>
+                  <button 
+                    onClick={() => handleDeleteGallery(item._id)} 
+                    className="w-full bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer"
+                  >
+                    Delete Photo
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
-          <button 
-            onClick={() => handleDeleteGallery(item._id)} 
-            className="w-full bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer"
-          >
-            Delete Photo
-          </button>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+        )}
+
+        {activeTab === 'video' && (
+          <div>
+            <h1 className="text-2xl font-bold text-amber-500 mb-6">Featured YouTube Video</h1>
+            <form onSubmit={handleSaveVideo} className="bg-neutral-900 p-6 rounded-2xl mb-8 space-y-4 max-w-2xl border border-neutral-800">
+              <p className="text-xs text-neutral-400">Paste any YouTube video link here. It will automatically update on the website's cinematic video section.</p>
+              <input 
+                type="text" 
+                placeholder="https://www.youtube.com/watch?v=xxxxxx" 
+                value={youtubeUrl} 
+                onChange={e => setYoutubeUrl(e.target.value)} 
+                required 
+                className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" 
+              />
+              <button type="submit" className="bg-amber-500 text-black px-6 py-2 rounded-xl text-xs font-bold uppercase cursor-pointer">Save Video URL</button>
+            </form>
+          </div>
+        )}
 
         {activeTab === 'enquiries' && (
           <div>
@@ -307,7 +352,6 @@ const handleDeleteGallery = async (id) => {
                       </span>
                       
                       <div className="flex items-center gap-2">
-                        {/* WhatsApp Chat Button */}
                         <a
                           href={`https://wa.me/91${enq.phone.replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(enq.name)},%20Thank%20you%20for%20reaching%20out%20to%20Srikar%20Studio%20regarding%20your%20${encodeURIComponent(enq.service)}%20booking%20on%20${enq.date}.`}
                           target="_blank"
@@ -317,7 +361,6 @@ const handleDeleteGallery = async (id) => {
                           💬 WhatsApp
                         </a>
 
-                        {/* Delete Button */}
                         <button
                           onClick={async () => {
                             if (window.confirm('Delete this enquiry?')) {

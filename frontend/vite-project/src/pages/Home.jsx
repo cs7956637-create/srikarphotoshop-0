@@ -1,6 +1,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import HeroSlider from '../components/HeroSlider';
+import VideoSection from '../components/VideoSection'; // 👈 Ikada import chey
 import About from '../components/About';
 import ServicesPricing from '../components/ServicesPricing';
 import Gallery from '../components/Gallery';
@@ -12,6 +13,7 @@ const Home = () => {
     <div className="bg-neutral-950 min-h-screen text-white">
       <Navbar />
       <HeroSlider />
+      <VideoSection /> {/* 👈 HeroSlider tharuvatha place chey */}
       <About />
       <ServicesPricing />
       <Gallery />
