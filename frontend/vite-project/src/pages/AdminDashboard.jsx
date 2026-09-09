@@ -301,23 +301,43 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {activeTab === 'video' && (
-          <div>
-            <h1 className="text-2xl font-bold text-amber-500 mb-6">Featured YouTube Video</h1>
-            <form onSubmit={handleSaveVideo} className="bg-neutral-900 p-6 rounded-2xl mb-8 space-y-4 max-w-2xl border border-neutral-800">
-              <p className="text-xs text-neutral-400">Paste any YouTube video link here. It will automatically update on the website's cinematic video section.</p>
-              <input 
-                type="text" 
-                placeholder="https://www.youtube.com/watch?v=xxxxxx" 
-                value={youtubeUrl} 
-                onChange={e => setYoutubeUrl(e.target.value)} 
-                required 
-                className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" 
-              />
-              <button type="submit" className="bg-amber-500 text-black px-6 py-2 rounded-xl text-xs font-bold uppercase cursor-pointer">Save Video URL</button>
-            </form>
-          </div>
-        )}
+    {activeTab === 'video' && (
+  <div>
+    <h1 className="text-2xl font-bold text-amber-500 mb-6">Featured YouTube Video</h1>
+    <form onSubmit={handleSaveVideo} className="bg-neutral-900 p-6 rounded-2xl mb-8 space-y-4 max-w-2xl border border-neutral-800">
+      <p className="text-xs text-neutral-400">Paste any YouTube video link here. It will automatically update on the website's cinematic video section.</p>
+      <input 
+        type="text" 
+        placeholder="https://www.youtube.com/watch?v=xxxxxx" 
+        value={youtubeUrl} 
+        onChange={e => setYoutubeUrl(e.target.value)} 
+        required 
+        className="w-full bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-sm text-white" 
+      />
+      <div className="flex gap-4">
+        <button type="submit" className="bg-amber-500 text-black px-6 py-2 rounded-xl text-xs font-bold uppercase cursor-pointer">Save Video URL</button>
+        <button 
+          type="button" 
+          onClick={async () => {
+            if (window.confirm('Delete featured video?')) {
+              try {
+                await API.delete('/video');
+                setYoutubeUrl('');
+                alert('Video deleted successfully!');
+              } catch (err) {
+                console.error(err);
+                alert('Failed to delete video');
+              }
+            }
+          }}
+          className="bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 px-6 py-2 rounded-xl text-xs font-bold uppercase transition cursor-pointer"
+        >
+          Delete Video
+        </button>
+      </div>
+    </form>
+  </div>
+)}
 
         {activeTab === 'enquiries' && (
           <div>

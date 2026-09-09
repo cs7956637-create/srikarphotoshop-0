@@ -13,7 +13,8 @@ const Home = () => {
     <div className="bg-neutral-950 min-h-screen text-white">
       <Navbar />
       <HeroSlider />
-      <VideoSection /> {/* 👈 HeroSlider tharuvatha place chey */}
+       <VideoSection />
+      {/* 👈 HeroSlider tharuvatha place chey */}
       <About />
       <ServicesPricing />
       <Gallery />

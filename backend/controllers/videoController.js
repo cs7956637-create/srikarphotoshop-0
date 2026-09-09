@@ -14,7 +14,6 @@ const getVideo = async (req, res) => {
 const updateVideo = async (req, res) => {
   try {
     const { youtubeUrl } = req.body;
-    // Okaroju okate video untadi kabatti unnadhi update cheyadam leda kothadi create cheyadam
     let video = await Video.findOne();
     if (video) {
       video.youtubeUrl = youtubeUrl;
@@ -28,4 +27,14 @@ const updateVideo = async (req, res) => {
   }
 };
 
-module.exports = { getVideo, updateVideo };
+// Delete featured video
+const deleteVideo = async (req, res) => {
+  try {
+    await Video.deleteMany({});
+    res.status(200).json({ message: 'Video deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = { getVideo, updateVideo, deleteVideo };

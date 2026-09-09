@@ -4,12 +4,25 @@ import API from '../api/axios';
 const VideoSection = () => {
   const [videoUrl, setVideoUrl] = useState('');
 
-  // YouTube URL ni embed format loki marchadaniki helper function
+  // Enhanced helper function with autoplay & mute parameters
   const getEmbedUrl = (url) => {
     if (!url) return '';
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : url;
+    
+    let videoId = '';
+    if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1]?.split('?')[0];
+    } else if (url.includes('watch?v=')) {
+      videoId = url.split('watch?v=')[1]?.split('&')[0];
+    } else if (url.includes('/shorts/')) {
+      videoId = url.split('/shorts/')[1]?.split('?')[0];
+    } else if (url.includes('/embed/')) {
+      videoId = url.split('/embed/')[1]?.split('?')[0];
+    }
+
+    // ?autoplay=1&mute=1&loop=1&playlist=videoId (loop kooda avthundi కావాలంటే)
+    return videoId 
+      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1` 
+      : url;
   };
 
   useEffect(() => {
@@ -26,7 +39,7 @@ const VideoSection = () => {
     fetchVideo();
   }, []);
 
-  if (!videoUrl) return null; // Video లేకపోతే సెక్షన్ అసలు కనబడదు
+  if (!videoUrl) return null;
 
   return (
     <section className="py-20 bg-neutral-950 text-white text-center px-6">
@@ -38,7 +51,7 @@ const VideoSection = () => {
           Watch Our Latest Creation
         </h2>
         
-        {/* Responsive YouTube Iframe */}
+        {/* Responsive YouTube Iframe with autoplay & mute */}
         <div className="relative w-full aspect-video rounded-3xl overflow-hidden border border-neutral-800 shadow-2xl bg-neutral-900">
           <iframe
             src={videoUrl}
