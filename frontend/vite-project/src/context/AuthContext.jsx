@@ -8,12 +8,30 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedAdmin = localStorage.getItem('adminInfo');
-    if (token && storedAdmin) {
-      setAdmin(JSON.parse(storedAdmin));
-    }
-    setLoading(false);
+    const verifyToken = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Backend lo token verify chese endpoint undali (e.g., /auth/verify or /admin/me)
+        const response = await API.get('/auth/verify'); 
+        if (response.data) {
+          setAdmin(response.data);
+        }
+      } catch (error) {
+        // Token invalid aithe local storage clean cheseyyali
+        localStorage.removeItem('token');
+        localStorage.removeItem('adminInfo');
+        setAdmin(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifyToken();
   }, []);
 
   const login = async (username, password) => {
@@ -21,11 +39,8 @@ export const AuthProvider = ({ children }) => {
       const response = await API.post('/auth/login', { username, password });
 
       if (response.data && response.data.token) {
-        // Save token and admin info using matching keys
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('adminInfo', JSON.stringify(response.data));
-        
-        // Update state using 'setAdmin' (not 'setUser')
         setAdmin(response.data);
         return response.data;
       }
